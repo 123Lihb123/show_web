@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ADXL345三轴振动实时曲线</title>
+    <script src="./chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { 
+        font-family: Arial, sans-serif; 
+        background: transparent;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      .chart-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 20px;
+        height: auto;
+        overflow: visible;
+      }
+      .chart-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        text-align: center;
+        border-bottom: 2px solid #2196f3;
+        padding-bottom: 10px;
+      }
+      canvas {
+        width: 100%;
+        height: 380px;
+        display: block;
+      }
+      .btn-box {
+        margin-top: 15px;
+        text-align: center;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+      button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #2196f3;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+      button:hover {
+        background: #1976d2;
+        transform: translateY(-1px);
+      }
+      button:active {
+        transform: translateY(0);
+      }
+      .status-box {
+        margin-top: 15px;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        background: #f5f5f5;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 13px;
+        min-height: 50px;
+      }
+      .status-success { color: #4caf50; }
+      .status-error { color: #f44336; }
+      .status-info { color: #2196f3; }
+    </style>
+  </head>
+  <body>
+    <div class="chart-container">
+      <div class="chart-title">📊 ADXL345三轴振动实时曲线</div>
+      <canvas id="frequency_Chart"></canvas>
+      <div class="btn-box">
+        <button id="start">开始采集ESP32数据</button>
+        <button id="stop">停止采集</button>
+        <button id="exportImg">导出三轴截图</button>
+        <button id="exportX">导出X轴截图</button>
+        <button id="exportY">导出Y轴截图</button>
+        <button id="exportZ">导出Z轴截图</button>
+        <button id="exportCsv">导出全部三轴CSV数据</button>
+      </div>
+      <div class="status-box" id="status-box">
+        <span class="status-info">等待操作...</span>
+      </div>
+    </div>
+    <script src="./frequency_chart.js"></script>
+    <script>
+      function sendHeight() {
+        const container = document.querySelector('.chart-container');
+        const height = container.offsetHeight;
+        if (window.parent) {
+          window.parent.postMessage({ type: 'chartHeight', height: height }, '*');
+        }
+      }
+      window.addEventListener('load', sendHeight);
+      setTimeout(sendHeight, 100);
+      setTimeout(sendHeight, 500);
+    </script>
+  </body>
+</html>
