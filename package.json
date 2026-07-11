@@ -1,0 +1,8 @@
+{
+  "name": "show_web",
+  "version": "1.0.0",
+  "description": "车辆道路检测系统",
+  "scripts": {
+    "build": "exit 0"
+  }
+}
