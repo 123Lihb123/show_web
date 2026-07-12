@@ -1,7 +1,7 @@
 let frequencyChart;
 let fetchTimer = null;
 let chartUpdateTimer = null;
-const ESP32_API_URL = "http://10.136.28.223";
+const CLOUD_API_URL = "https://adxl345-data-server.YOUR_WORKER_SUBDOMAIN.workers.dev";
 const MAX_SHOW = 200;
 const CHART_UPDATE_INTERVAL = 50;
 
@@ -133,11 +133,29 @@ function updateStatus(msg, type) {
 function startFetchESP32() {
   if (fetchTimer) return;
 
-  updateStatus("开始连接ESP32: " + ESP32_API_URL, "info");
+  updateStatus("开始从云端获取数据: " + CLOUD_API_URL, "info");
+
+  fetch(CLOUD_API_URL + "/history")
+    .then(res => res.json())
+    .then(history => {
+      history.forEach(item => {
+        const date = new Date(item.timestamp);
+        const timeStr = date.toLocaleTimeString() + "." + String(date.getMilliseconds()).padStart(3, "0");
+        timeList.push(timeStr);
+        xData.push(item.x);
+        yData.push(item.y);
+        zData.push(item.z);
+        allRecord.push({ time: timeStr, X: item.x, Y: item.y, Z: item.z });
+      });
+      frequencyChart.update("none");
+    })
+    .catch(err => {
+      updateStatus("获取历史数据失败: " + err.message, "error");
+    });
 
   fetchTimer = setInterval(async () => {
     try {
-      const res = await fetch(ESP32_API_URL + "/acceleration", {
+      const res = await fetch(CLOUD_API_URL + "/latest", {
         method: "GET",
         mode: "cors",
         cache: "no-cache",
@@ -160,7 +178,7 @@ function startFetchESP32() {
     } catch (err) {
       updateStatus("连接失败: " + err.message, "error");
     }
-  }, 50);
+  }, 1000);
 
   chartUpdateTimer = setInterval(updateChart, CHART_UPDATE_INTERVAL);
 }
