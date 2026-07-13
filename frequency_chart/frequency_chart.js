@@ -153,29 +153,7 @@ function startFetchESP32() {
   frequencyChart.data.datasets[2].data = [];
   frequencyChart.update("none");
 
-  updateStatus("开始从云端获取数据: " + CLOUD_API_URL, "info");
-
-  fetch(CLOUD_API_URL + "/history")
-    .then(res => res.json())
-    .then(history => {
-      history.forEach(item => {
-        const date = new Date(item.timestamp);
-        const timeStr = date.toLocaleTimeString() + "." + String(date.getMilliseconds()).padStart(3, "0");
-        timeList.push(timeStr);
-        xData.push(item.x);
-        yData.push(item.y);
-        zData.push(item.z);
-        allRecord.push({ time: timeStr, X: item.x, Y: item.y, Z: item.z });
-      });
-      frequencyChart.data.labels = timeList;
-      frequencyChart.data.datasets[0].data = xData;
-      frequencyChart.data.datasets[1].data = yData;
-      frequencyChart.data.datasets[2].data = zData;
-      frequencyChart.update("none");
-    })
-    .catch(err => {
-      updateStatus("获取历史数据失败: " + err.message, "error");
-    });
+  updateStatus("开始从云端获取数据", "info");
 
   fetchTimer = setInterval(async () => {
     try {
