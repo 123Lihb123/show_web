@@ -32,7 +32,7 @@ async function handleUpload(request, env) {
   try {
     const data = await request.json();
     
-    if (!data.x || !data.y || !data.z) {
+    if (data.x === undefined || data.y === undefined || data.z === undefined) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },

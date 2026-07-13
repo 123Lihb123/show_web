@@ -1,7 +1,7 @@
 let frequencyChart;
 let fetchTimer = null;
 let chartUpdateTimer = null;
-const CLOUD_API_URL = "";
+const CLOUD_API_URL = "/api";
 const MAX_SHOW = 200;
 const CHART_UPDATE_INTERVAL = 50;
 
