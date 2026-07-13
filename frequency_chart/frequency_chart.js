@@ -133,6 +133,22 @@ function updateStatus(msg, type) {
 function startFetchESP32() {
   if (fetchTimer) return;
 
+  timeList = [];
+  xData = [];
+  yData = [];
+  zData = [];
+  allRecord = [];
+  pendingX = [];
+  pendingY = [];
+  pendingZ = [];
+  pendingTime = [];
+
+  frequencyChart.data.labels = [];
+  frequencyChart.data.datasets[0].data = [];
+  frequencyChart.data.datasets[1].data = [];
+  frequencyChart.data.datasets[2].data = [];
+  frequencyChart.update("none");
+
   updateStatus("开始从云端获取数据: " + CLOUD_API_URL, "info");
 
   fetch(CLOUD_API_URL + "/history")
