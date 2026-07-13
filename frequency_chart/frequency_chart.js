@@ -3,7 +3,7 @@ let fetchTimer = null;
 let chartUpdateTimer = null;
 const CLOUD_API_URL = "/api";
 const MAX_SHOW = 200;
-const CHART_UPDATE_INTERVAL = 50;
+const CHART_UPDATE_INTERVAL = 100;
 
 let timeList = [];
 let xData = [];
@@ -91,6 +91,16 @@ function initChart() {
 function updateChart() {
   if (pendingX.length === 0) return;
 
+  const chartData = frequencyChart.data;
+  const ds0 = chartData.datasets[0];
+  const ds1 = chartData.datasets[1];
+  const ds2 = chartData.datasets[2];
+
+  chartData.labels.push(...pendingTime);
+  ds0.data.push(...pendingX);
+  ds1.data.push(...pendingY);
+  ds2.data.push(...pendingZ);
+
   timeList.push(...pendingTime);
   xData.push(...pendingX);
   yData.push(...pendingY);
@@ -101,18 +111,31 @@ function updateChart() {
   pendingZ = [];
   pendingTime = [];
 
-  while (timeList.length > MAX_SHOW) {
+  while (chartData.labels.length > MAX_SHOW) {
+    chartData.labels.shift();
+    ds0.data.shift();
+    ds1.data.shift();
+    ds2.data.shift();
     timeList.shift();
     xData.shift();
     yData.shift();
     zData.shift();
   }
 
-  frequencyChart.data.labels = timeList;
-  frequencyChart.data.datasets[0].data = xData;
-  frequencyChart.data.datasets[1].data = yData;
-  frequencyChart.data.datasets[2].data = zData;
   frequencyChart.update("none");
+  scrollToLatest();
+}
+
+function scrollToLatest() {
+  const xScale = frequencyChart.scales.x;
+  if (xScale && xScale.options) {
+    const labels = frequencyChart.data.labels;
+    if (labels.length > 0) {
+      xScale.options.min = labels[labels.length - MAX_SHOW] || undefined;
+      xScale.options.max = labels[labels.length - 1] || undefined;
+      frequencyChart.update("none");
+    }
+  }
 }
 
 function addNewData(x, y, z) {
