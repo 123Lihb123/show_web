@@ -108,6 +108,10 @@ function updateChart() {
     zData.shift();
   }
 
+  frequencyChart.data.labels = timeList;
+  frequencyChart.data.datasets[0].data = xData;
+  frequencyChart.data.datasets[1].data = yData;
+  frequencyChart.data.datasets[2].data = zData;
   frequencyChart.update("none");
 }
 
@@ -163,6 +167,10 @@ function startFetchESP32() {
         zData.push(item.z);
         allRecord.push({ time: timeStr, X: item.x, Y: item.y, Z: item.z });
       });
+      frequencyChart.data.labels = timeList;
+      frequencyChart.data.datasets[0].data = xData;
+      frequencyChart.data.datasets[1].data = yData;
+      frequencyChart.data.datasets[2].data = zData;
       frequencyChart.update("none");
     })
     .catch(err => {
