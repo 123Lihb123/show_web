@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; margin-right: 10px; }
+    pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>API Test</h1>
+  
+  <div class="test">
+    <button onclick="test('/api/latest')">Test /api/latest</button>
+    <button onclick="test('/api/history')">Test /api/history</button>
+    <button onclick="test('/test')">Test /test</button>
+    <pre id="result"></pre>
+  </div>
+  
+  <script>
+    async function test(path) {
+      const result = document.getElementById('result');
+      result.innerHTML = 'Loading...';
+      
+      try {
+        const res = await fetch(path);
+        const text = await res.text();
+        result.innerHTML = `<strong>${res.status} ${res.statusText}</strong>\n${text}`;
+      } catch (e) {
+        result.innerHTML = `<strong>Error:</strong> ${e.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
