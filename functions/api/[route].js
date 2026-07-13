@@ -7,6 +7,13 @@ export async function onRequest(context) {
   const { method, url } = request;
   const path = new URL(url).pathname;
 
+  if (!env.STORAGE) {
+    return new Response(JSON.stringify({ error: 'KV storage not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  }
+
   if (path === '/api/upload' && method === 'POST') {
     return await handleUpload(request, env);
   } else if (path === '/api/latest' && method === 'GET') {
@@ -15,7 +22,10 @@ export async function onRequest(context) {
     return await handleGetHistory(env);
   }
 
-  return new Response('API not found', { status: 404 });
+  return new Response(JSON.stringify({ error: 'API not found' }), { 
+    status: 404,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  });
 }
 
 async function handleUpload(request, env) {
@@ -25,7 +35,7 @@ async function handleUpload(request, env) {
     if (!data.x || !data.y || !data.z) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
     }
 
@@ -55,7 +65,7 @@ async function handleUpload(request, env) {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
   }
 }
@@ -75,7 +85,7 @@ async function handleGetLatest(env) {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
   }
 }
@@ -94,7 +104,7 @@ async function handleGetHistory(env) {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
   }
 }
