@@ -1,5 +1,7 @@
 const CACHE_KEY_LATEST = 'adxl345_latest';
 const CACHE_KEY_HISTORY = 'adxl345_history';
+const CACHE_KEY_GPS_LATEST = 'gps_latest';
+const CACHE_KEY_GPS_HISTORY = 'gps_history';
 const MAX_HISTORY_SIZE = 200;
 
 export async function onRequest(context) {
@@ -20,6 +22,10 @@ export async function onRequest(context) {
     return await handleGetLatest(env);
   } else if (path === '/api/history' && method === 'GET') {
     return await handleGetHistory(env);
+  } else if (path === '/api/gps/latest' && method === 'GET') {
+    return await handleGetGPSLatest(env);
+  } else if (path === '/api/gps/history' && method === 'GET') {
+    return await handleGetGPSHistory(env);
   }
 
   return new Response(JSON.stringify({ error: 'API not found' }), { 
@@ -59,6 +65,27 @@ async function handleUpload(request, env) {
 
     await env.STORAGE.put(CACHE_KEY_HISTORY, JSON.stringify(history));
 
+    if (data.lat !== undefined || data.lng !== undefined) {
+      const gpsRecord = {
+        lat: parseFloat(data.lat),
+        lng: parseFloat(data.lng),
+        alt: parseFloat(data.alt) || 0,
+        gps_valid: data.gps_valid === true || data.gps_valid === 'true',
+        timestamp: timestamp,
+      };
+      await env.STORAGE.put(CACHE_KEY_GPS_LATEST, JSON.stringify(gpsRecord));
+      
+      const gpsHistoryStr = await env.STORAGE.get(CACHE_KEY_GPS_HISTORY);
+      let gpsHistory = gpsHistoryStr ? JSON.parse(gpsHistoryStr) : [];
+      gpsHistory.push(gpsRecord);
+      
+      if (gpsHistory.length > MAX_HISTORY_SIZE) {
+        gpsHistory = gpsHistory.slice(-MAX_HISTORY_SIZE);
+      }
+      
+      await env.STORAGE.put(CACHE_KEY_GPS_HISTORY, JSON.stringify(gpsHistory));
+    }
+
     return new Response(JSON.stringify({ success: true, timestamp: timestamp }), {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
@@ -93,6 +120,45 @@ async function handleGetLatest(env) {
 async function handleGetHistory(env) {
   try {
     const data = await env.STORAGE.get(CACHE_KEY_HISTORY);
+    if (!data) {
+      return new Response(JSON.stringify([]), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
+    return new Response(data, {
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  }
+}
+
+async function handleGetGPSLatest(env) {
+  try {
+    const data = await env.STORAGE.get(CACHE_KEY_GPS_LATEST);
+    if (!data) {
+      return new Response(JSON.stringify({ error: 'No GPS data available' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
+    return new Response(data, {
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  }
+}
+
+async function handleGetGPSHistory(env) {
+  try {
+    const data = await env.STORAGE.get(CACHE_KEY_GPS_HISTORY);
     if (!data) {
       return new Response(JSON.stringify([]), {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },

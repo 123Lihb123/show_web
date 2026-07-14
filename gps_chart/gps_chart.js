@@ -1,5 +1,4 @@
-const ESP32_IP = "10.136.38.223";
-const GPS_API = `http://10.136.28.223/gps`;
+const CLOUD_API_URL = "/api";
 
 let frequencyChart;
 let fetchTimer = null;
@@ -99,26 +98,44 @@ function updateGPSInfo(data) {
 
 async function fetchGPSData() {
   try {
-    const response = await fetch(GPS_API);
+    const response = await fetch(CLOUD_API_URL + "/gps/latest", {
+      method: "GET",
+      mode: "cors",
+      cache: "no-cache",
+    });
+
+    if (!response.ok) {
+      updateStatus("HTTP错误: " + response.status, "error");
+      return;
+    }
+
     const data = await response.json();
 
     const now = new Date().toLocaleTimeString();
 
-    if (data.valid) {
+    if (data.gps_valid) {
       timeList.push(now);
-      latData.push(data.latitude);
-      lngData.push(data.longitude);
-      altData.push(data.altitude);
+      latData.push(data.lat);
+      lngData.push(data.lng);
+      altData.push(data.alt);
 
       allRecord.push({
         time: now,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        altitude: data.altitude,
+        latitude: data.lat,
+        longitude: data.lng,
+        altitude: data.alt,
       });
 
-      updateGPSInfo(data);
+      updateGPSInfo({
+        valid: true,
+        latitude: data.lat,
+        longitude: data.lng,
+        altitude: data.alt,
+        time: now,
+      });
       updateChart();
+    } else {
+      updateGPSInfo({ valid: false });
     }
   } catch (error) {
     updateStatus("连接失败: " + error.message, "error");
