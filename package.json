@@ -1,7 +1,7 @@
 {
   "name": "show_web",
   "version": "1.0.0",
-  "description": "车辆道路检测系统",
+  "description": "车载式道路表面状况检测系统",
   "scripts": {
     "build": "echo 'Build complete'"
   }
